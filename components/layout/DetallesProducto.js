@@ -1,117 +1,130 @@
 import React from 'react';
-import styled from '@emotion/styled';
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
-import { es } from 'date-fns/locale';
-import Link from 'next/link';
+import styled from '@emotion/styled'
+import formatDistanceToNow from 'date-fns/formatDistanceToNow'
+import {es} from 'date-fns/locale'
 
 const Producto = styled.li`
+
     padding: 4rem;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e1e1e1;
-`;
+    align-items:center;
+    border-bottom: 1px solid black;
+
+`
+
 const DescripcionProducto = styled.div`
+//flex 0 no crece y no se haga mas pequeno de 600px ,600px en la base
     flex: 0 1 600px;
     display: grid;
     grid-template-columns: 1fr 3fr;
     column-gap: 2rem;
-`;
+`
 
 const Titulo = styled.a`
+
     font-size: 2rem;
     font-weight: bold;
     margin: 0;
-
-    :hover {
+    :hover{
         cursor: pointer;
     }
-`;
 
-const TextoDescripcion = styled.p`
-    font-size: 1.6rem;
-    margin: 0;
-    color: #888;
 `
+
 
 const Comentarios = styled.div`
     margin-top: 2rem;
-    display: flex;
+    display:flex;
     align-items: center;
-    div {
+    div{
         display: flex;
         align-items: center;
-        border: 1px solid #e1e1e1;
+        border: 1px solid black;
         padding: .3rem 1rem;
         margin-right: 2rem;
+
     }
-    img {
+    img{
         width: 2rem;
         margin-right: 2rem;
+
     }
-    p {
+    p{
         font-size: 1.6rem;
         margin-right: 1rem;
         font-weight: 700;
-        &:last-of-type {
+        &:last-of-type{
             margin: 0;
         }
     }
-`;
 
-const Imagen = styled.img`
-    width: 200px;
-`;
-
+`
 const Votos = styled.div`
     flex: 0 0 auto;
-    text-align: center; 
-    border: 1px solid #e1e1e1;
+    text-align: center;
+    border: 1px solid black;
     padding: 1rem 3rem;
-
-    div {
+    div{
         font-size: 2rem;
     }
 
-    p {
+    p{
         margin: 0;
         font-size: 2rem;
         font-weight: 700;
     }
-`;
+
+`
+
+const Imagen = styled.img`
+
+    width: 200px;
+
+`
+
+
+const TextoDescripcion = styled.p`
+
+    font-size: 1.6rem;
+    margin: 0;
+    color: grey;
+
+
+`
 
 const DetallesProducto = ({producto}) => {
 
-    const { id, comentarios, creado, descripcion, empresa, nombre, url, urlimagen, votos } = producto;
-
+    const  {id,comentarios,descripcion,empresa,nombre,url,urlImagen,votos,creado} = producto
 
     return ( 
-        <Producto>
+
+            <Producto>
+
+            <div>
+            <Imagen src={urlImagen} />
+            </div>
+            
             <DescripcionProducto>
-                <div>
-                    <Imagen src={urlimagen}  />
-                </div>
+            <Titulo>{nombre}</Titulo>
+            <TextoDescripcion>{descripcion}</TextoDescripcion>
 
-                <div>
-                    <Link href="/productos/[id]" as={`/productos/${id}`}>
-                        <Titulo>{nombre}</Titulo>
-                    </Link>
-                    <TextoDescripcion>{descripcion}</TextoDescripcion>
-                    <Comentarios>
-                        <div>
-                            <img src="/static/img/comentario.png" />
-                            <p>{comentarios.length} Comentarios</p>
-                        </div>
-                    </Comentarios>
-                    <p>Publicado hace: { formatDistanceToNow( new Date(creado), {locale: es} )} </p>
-                </div>
+            <Comentarios>
+                <img src="/static/img/comentario.png" />
+                <p>{comentarios.length} comentarios</p>
+
+            </Comentarios>
+
+    <p>Publicado hace: {formatDistanceToNow(new Date(creado),{locale: es})}</p>
+
+
             </DescripcionProducto>
-
             <Votos>
-                <div> &#9650; </div>
+                <div>&#9650;</div>
                 <p>{votos}</p>
-            </Votos>
-        </Producto>
+                </Votos>         
+            </Producto>
+
      );
 }
  
