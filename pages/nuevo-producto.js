@@ -6,6 +6,8 @@ import Layout from '../components/layout/Layout'
 import {Formulario, Campo, InputSubmit, Error } from '../components/ui/Formulario'
 
 
+import Error404 from '../components/layout/404'
+
 import {FirebaseContext} from '../firebase'
 //validaciones
 
@@ -49,7 +51,12 @@ const NuevoProducto = () => {
             descripcion,
             votos:0,
             comentarios: [],
-            creado: Date.now()
+            creado: Date.now(),
+            creador: {
+                id: usuario.uid,
+                nombre: usuario.displayName
+            },
+            haVotado: []
         }
         //lo insertamos en la base de datos
         firebase.db.collection('productos').add(producto)
@@ -87,6 +94,7 @@ const NuevoProducto = () => {
     return (  
         <div>
             <Layout>
+                {!usuario ? <Error404/> : (
                 <>
                 <h1
                 css={css`
@@ -194,6 +202,9 @@ const NuevoProducto = () => {
                 </Formulario>
                 
                 </>
+                
+                )}
+                
             </Layout>
             </div>
     
