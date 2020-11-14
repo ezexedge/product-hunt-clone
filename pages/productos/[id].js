@@ -21,10 +21,13 @@ const ContenedorProducto = styled.div`
 
 `
 
+
 const Productos = () => {
 
     const [producto,guardarProducto] = useState({})
     const [error,guardarError] = useState(false)
+    const [comentario , guardarComentario] = useState({})
+    const [consultarDB, guardarConsultarDB] = useState(true)
 
     const  router = useRouter()
     const {query : {id}} = router
@@ -32,7 +35,7 @@ const Productos = () => {
      const {firebase,usuario} = useContext(FirebaseContext)
 
     useEffect(()=>{
-        if(id){
+        if(id && consultarDB){
         
             const obtenerProducto = async() => {
                 const productQuery = await firebase.db.collection('productos').doc(id)
@@ -40,8 +43,10 @@ const Productos = () => {
 
                 if(producto.exists){
                     guardarProducto(producto.data())
+                    guardarConsultarDB(false)
                 }else{
                     guardarError(true)
+                    guardarConsultarDB(true)
                 }
                 guardarProducto(producto.data())
 
@@ -50,7 +55,7 @@ const Productos = () => {
             obtenerProducto()
 
         }
-    },[id,producto])
+    },[id])
 
 
     const  {comentarios,descripcion,empresa,nombre,url,urlImagen,votos,creado,creador,haVotado} = producto
@@ -81,13 +86,90 @@ const Productos = () => {
             votos : nuevoTotal
         })
 
-        console.log(producto)
+
+        guardarConsultarDB(true)
+
     }
+//crear comentarios
+const comentarioChange = e => {
+    guardarComentario({
+        ...comentario,
+        [e.target.name] : e.target.value
+    })
+}
+
+const esCreador = id => {
+    if(creador.id === id) {
+        return true
+    }
+}
+
+const agregarComentario = e => {
+    e.preventDefault()
+
+    if(!usuario){
+        return router.push('/login')
+    }
+
+    comentario.usuarioId = usuario.uid
+    comentario.usuarioNombre = usuario.displayName
+
+    const nuevosComentarios = [...comentarios , comentario]
+
+    firebase.db.collection('productos').doc(id).update({
+        comentarios : nuevosComentarios
+    })
+
+
+
+
+    guardarComentario({
+        ...producto,
+        comentarios: nuevosComentarios
+    })
+
+}
+
+const puedeBorrar = () => {
+    if(!usuario) return false
+
+    if(creador){
+         if(creador.id === usuario.uid){
+            return true
+        }
+    }
+    
+}
+
+
+const eliminarProducto =  async () => {
+    if(!usuario){
+        return router.push('/login')
+    }
+
+    if(creador){
+        if(creador.id !== usuario.uid){
+            return router.push('/')
+
+       }
+    }
+    try{
+        
+        await firebase.db.collection('productos').doc(id).delete()
+        router.push('/')
+
+    
+    }catch(error){
+        console.log(error)
+    }
+
+
+}
 
     return ( 
     <Layout>
         <>
-        {Object.keys(producto).length === 0 ? 'cargando...' : null}
+        {(Object.keys(producto).length === 0 && !error) ? 'cargando...' : null}
 
         {error ? <Error404/> : (
              <div className="contenedor">
@@ -110,12 +192,14 @@ const Productos = () => {
                 {usuario && (
                     <>
                     
-                    <form>
+                    <form
+                    onSubmit={agregarComentario}
+                    >
                         <Campo>
                                 <input
                                         type="text"
-                                        name="mensaje"
-                                        //        onChange={comentarioChange}
+                                        name="comentario"
+                                        onChange={comentarioChange}
                                      />
                                         </Campo>
                                         <InputSubmit
@@ -133,13 +217,25 @@ const Productos = () => {
                                         margin: 2rem 0;
                  
                  `}>Comentarios</h2>
-                { comentarios ? comentarios.map(comentario => (
+                 
+                {!comentarios ? 'aun no hay comentarios' : ( 
+                    <ul>
+                   { comentarios.map(comentario => (
                     <li>
-                        <p>{comentario.nombre}</p>
+                        <p>{comentario.comentario}</p>
                        <p>Escrito por : {comentario.usuarioNombre}</p>
-                        
+                        {esCreador(comentario.usuarioId) && (<p
+                        css={css`
+                        padding: 2px;
+                        background-color: red;
+                        color: white;
+                        `}
+                        >Creador del producto</p>)}
                     </li>
-                )) : 'no hay comentarios'}
+                ))}
+                </ul>
+                )}
+            
             </div>
             <aside>
                 <Boton 
@@ -165,6 +261,11 @@ const Productos = () => {
             </aside>
 
         </ContenedorProducto>
+        {puedeBorrar() && (
+            <Boton
+            onClick={eliminarProducto}
+            >Eliminar Producto</Boton>
+        )}
         </div>
         ) }
 
