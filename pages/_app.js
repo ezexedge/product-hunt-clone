@@ -3,7 +3,7 @@ import firebase , {FirebaseContext} from '../firebase'
 import useAutenticacion from '../hooks/useAuthenticacion'
 const  MyApp = props => {
     const usuario = useAutenticacion()
-    console.log(usuario)
+    //console.log(usuario)
     const {Component , pageProps} = props
     return (
 
